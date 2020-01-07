@@ -1,0 +1,66 @@
+public class SyncAndAsyncTest {
+
+    public static void main(String[] args)throws Exception {
+
+        //sync(); //同步
+        async();  //异步
+    }
+
+
+    public static void async() throws Exception{
+        CompletableFuture<String> futureResult = sendAsyncMessage();
+        int   sum=handleSum(3,3);
+        System.out.println("计算出的sum的值是： "+sum);
+        System.out.println("===发送异步消息的响应结果result值是: "+futureResult.get());
+    }
+    /**
+     * 异步发送消息
+     * @return
+     */
+    public static  CompletableFuture<String> sendAsyncMessage(){
+        //异步调用
+        CompletableFuture<String> result = CompletableFuture.supplyAsync(() -> {
+            String upper = sendSyncMessage("hello");
+            return upper;
+        }).whenCompleteAsync(new BiConsumer<String, Throwable>() {
+            @Override
+            public void accept(String s, Throwable throwable) {
+                System.out.println("=========异步消息发送成功: "+s);
+            }
+        });
+        return result;
+    }
+
+
+    public static void sync( ) {
+        //同步调用
+        String result=sendSyncMessage("hello");
+        System.out.println("发送同步消息的响应结果:  "+result);
+        int   sum=handleSum(3,3);
+        System.out.println("计算出的sum的值是： "+sum);
+    }
+
+
+
+    private static int handleSum(int a, int b) {
+        return a+b;
+    }
+
+    /**
+     * 同步发送消息
+     * @param lowerLetters
+     * @return
+     */
+    public static String  sendSyncMessage(String lowerLetters) {
+        try {
+            //expense long time to run
+            Thread.sleep(5);
+            return lowerLetters.toUpperCase();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+}
